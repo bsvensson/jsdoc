@@ -445,7 +445,7 @@ cli.generateDocs = function() {
             env.opts,
             resolver.root
         );
-        logger.info('complete.');
+        logger.info('Completed generating output files.');
     }
     else {
         logger.fatal(env.opts.template + ' does not export a "publish" function. Global ' +
