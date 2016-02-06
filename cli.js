@@ -439,7 +439,7 @@ cli.generateDocs = function() {
 
     // templates should include a publish.js file that exports a "publish" function
     if (template.publish && typeof template.publish === 'function') {
-        logger.printInfo('Generating output files...');
+        logger.info('Generating output files...');
         template.publish(
             taffy(props.docs),
             env.opts,
