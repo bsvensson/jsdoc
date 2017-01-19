@@ -8,12 +8,12 @@ describe('jsdoc/src/syntax', function() {
         expect(typeof Syntax).toBe('object');
     });
 
-    it('should define all of the node types that are defined by Esprima', function() {
-        var esprimaSyntax = require('esprima').Syntax;
+    it('should define all of the node types that are defined by Espree', function() {
+        var espreeSyntax = require('espree').Syntax;
 
-        Object.keys(esprimaSyntax).forEach(function(nodeType) {
+        Object.keys(espreeSyntax).forEach(function(nodeType) {
             expect(Syntax[nodeType]).toBeDefined();
-            expect(Syntax[nodeType]).toBe(esprimaSyntax[nodeType]);
+            expect(Syntax[nodeType]).toBe(espreeSyntax[nodeType]);
         });
     });
 

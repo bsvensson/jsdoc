@@ -2,6 +2,7 @@
 
 describe('jsdoc/tag/validator', function() {
     var doop = require('jsdoc/util/doop');
+    var env = require('jsdoc/env');
     var logger = require('jsdoc/util/logger');
     var tag = require('jsdoc/tag');
     var validator = require('jsdoc/tag/validator');
@@ -19,7 +20,7 @@ describe('jsdoc/tag/validator', function() {
     describe('validate', function() {
         var dictionary = require('jsdoc/tag/dictionary');
 
-        var allowUnknown = !!global.env.conf.tags.allowUnknownTags;
+        var allowUnknown = !!env.conf.tags.allowUnknownTags;
         var badTag = { title: 'lkjasdlkjfb' };
         var badTag2 = new tag.Tag('type', '{string} I am a string!');
         var meta = {
@@ -40,18 +41,32 @@ describe('jsdoc/tag/validator', function() {
         });
 
         afterEach(function() {
-            global.env.conf.tags.allowUnknownTags = allowUnknown;
+            env.conf.tags.allowUnknownTags = allowUnknown;
         });
 
         it('logs an error if the tag is not in the dictionary and conf.tags.allowUnknownTags is false', function() {
-            global.env.conf.tags.allowUnknownTags = false;
+            env.conf.tags.allowUnknownTags = false;
+            validateTag(badTag);
+
+            expect(logger.error).toHaveBeenCalled();
+        });
+
+        it('logs an error if the tag is not in the dictionary and conf.tags.allowUnknownTags is does not include it', function() {
+            env.conf.tags.allowUnknownTags = [];
             validateTag(badTag);
 
             expect(logger.error).toHaveBeenCalled();
         });
 
         it('does not log an error if the tag is not in the dictionary and conf.tags.allowUnknownTags is true', function() {
-            global.env.conf.tags.allowUnknownTags = true;
+            env.conf.tags.allowUnknownTags = true;
+            validateTag(badTag);
+
+            expect(logger.error).not.toHaveBeenCalled();
+        });
+
+        it('does not log an error if the tag is not in the dictionary and conf.tags.allowUnknownTags includes it', function() {
+            env.conf.tags.allowUnknownTags = [badTag.title];
             validateTag(badTag);
 
             expect(logger.error).not.toHaveBeenCalled();
@@ -88,7 +103,7 @@ describe('jsdoc/tag/validator', function() {
         });
 
         it('logs meta.comment when present', function() {
-            global.env.conf.tags.allowUnknownTags = false;
+            env.conf.tags.allowUnknownTags = false;
             validateTag(badTag);
 
             expect(logger.error.mostRecentCall.args[0]).toContain(meta.comment);

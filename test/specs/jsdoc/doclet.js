@@ -5,7 +5,6 @@ describe('jsdoc/doclet', function() {
     var _ = require('underscore');
     var Doclet = require('jsdoc/doclet').Doclet;
 
-    var debug = !!global.env.opts.debug;
     var docSet = jasmine.getDocSetFromFile('test/fixtures/doclet.js');
     var test1 = docSet.getByLongname('test1')[0];
     var test2 = docSet.getByLongname('test2')[0];
@@ -13,30 +12,15 @@ describe('jsdoc/doclet', function() {
     var expectList = '* List item 1';
     var expectStrong = '**Strong** is strong';
 
-    afterEach(function() {
-        global.env.opts.debug = debug;
-    });
-
     it('does not mangle Markdown in a description that uses leading asterisks', function() {
         expect(test2.description.indexOf(expectList)).toBeGreaterThan(-1);
         expect(test2.description.indexOf(expectStrong)).toBeGreaterThan(-1);
     });
 
-    it('adds the AST node as a non-enumerable property by default', function() {
+    it('adds the AST node as a non-enumerable property', function() {
         var descriptor = Object.getOwnPropertyDescriptor(test1.meta.code, 'node');
 
         expect(descriptor.enumerable).toBe(false);
-    });
-
-    it('adds the AST node as an enumerable property in debug mode', function() {
-        var descriptor;
-        var doclet;
-
-        global.env.opts.debug = true;
-        doclet = jasmine.getDocSetFromFile('test/fixtures/doclet.js').getByLongname('test1')[0];
-        descriptor = Object.getOwnPropertyDescriptor(doclet.meta.code, 'node');
-
-        expect(descriptor.enumerable).toBe(true);
     });
 
     describe('setScope', function() {

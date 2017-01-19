@@ -1,6 +1,7 @@
 'use strict';
 
 describe('jsdoc/util/markdown', function() {
+    var env = require('jsdoc/env');
     var markdown = require('jsdoc/util/markdown');
 
     it('should exist', function() {
@@ -14,14 +15,14 @@ describe('jsdoc/util/markdown', function() {
     });
 
     describe('getParser', function() {
-        var originalMarkdownConf = global.env.conf.markdown;
+        var originalMarkdownConf = env.conf.markdown;
 
         function setMarkdownConf(hash) {
-            global.env.conf.markdown = hash;
+            env.conf.markdown = hash;
         }
 
         afterEach(function() {
-            global.env.conf.markdown = originalMarkdownConf;
+            env.conf.markdown = originalMarkdownConf;
         });
 
         it('should retrieve a function when called with default settings', function() {
@@ -95,6 +96,14 @@ describe('jsdoc/util/markdown', function() {
                 '</code></pre>';
 
             expect(parser(markdownText)).toBe(convertedText);
+        });
+
+        it('should hardwrap new lines when hardwrap is enabled', function() {
+            var storage = setMarkdownConf({hardwrap: true});
+            var parser = markdown.getParser();
+
+            expect(parser('line one\nline two')).toEqual(
+                '<p>line one<br>line two</p>');
         });
     });
 });

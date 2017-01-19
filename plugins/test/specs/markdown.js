@@ -1,10 +1,11 @@
 'use strict';
 
+var env = require('jsdoc/env');
 var path = require('jsdoc/path');
 
 describe('markdown plugin', function() {
     var pluginPath = 'plugins/markdown';
-    var pluginPathResolved = path.join(global.env.dirname, pluginPath);
+    var pluginPathResolved = path.join(env.dirname, pluginPath);
     var plugin = require(pluginPathResolved);
 
     var docSet = jasmine.getDocSetFromFile('plugins/test/fixtures/markdown.js');
@@ -28,6 +29,15 @@ describe('markdown plugin', function() {
             // if we processed the value, it should be wrapped in a <p> tag
             expect( /^<p>(?:.+)<\/p>$/.test(value) ).toBe(true);
         });
+    });
+
+    it('should unescape &quot; entities in inline tags, but not elsewhere', function() {
+        var myOtherClass = docSet.getByLongname('MyOtherClass')[0];
+
+        plugin.handlers.newDoclet({ doclet: myOtherClass });
+
+        expect(myOtherClass.description).toContain('chat."#channel"."say-\\"hello\\""');
+        expect(myOtherClass.description).toContain('&quot;See&quot;');
     });
 
     describe('@see tag support', function() {
