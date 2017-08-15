@@ -23,7 +23,7 @@ describe('jsdoc/tutorial/resolver', function() {
 
         resolver.load(env.dirname + '/test/tutorials/tutorials');
 
-        childNames = resolver.root.children.map(function (t) { return t.name; });
+        childNames = resolver.root.children.map(function(t) { return t.name; });
         test = resolver.root.getByName('test');
         test2 = resolver.root.getByName('test2');
         test3 = resolver.root.getByName('test3');
@@ -142,6 +142,16 @@ describe('jsdoc/tutorial/resolver', function() {
             expect(test6.type).toBe(tutorial.TYPES.HTML);
             expect(constr.type).toBe(tutorial.TYPES.MARKDOWN);
         });
+
+        it('JSON files with a leading BOM are handled correctly', function() {
+            resetRootTutorial();
+
+            function loadBomTutorials() {
+                resolver.load(env.dirname + '/test/tutorials/bom');
+            }
+
+            expect(loadBomTutorials).not.toThrow();
+        });
     });
 
     // resolve
@@ -213,6 +223,7 @@ describe('jsdoc/tutorial/resolver', function() {
 
         it('logs a warning for duplicate-named tutorials (e.g. test.md, test.html)', function() {
             var tute = new tutorial.Tutorial('myTutorial', '', tutorial.TYPES.HTML);
+
             resolver.addTutorial(tute);
             resolver.addTutorial(tute);
 

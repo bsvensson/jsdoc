@@ -39,18 +39,32 @@ describe('jsdoc/opts/args', function() {
             expect(r.template).toBe('mytemplate');
         });
 
-        it('should accept a "-c" option and return an object with a "configure" property', function() {
+        it('should accept a "-c" option with a JSON file and return an object with a "configure" property', function() {
             args.parse(['-c', 'myconf.json']);
             var r = args.get();
 
             expect(r.configure).toBe('myconf.json');
         });
 
-        it('should accept a "--configure" option and return an object with a "configure" property', function() {
+        it('should accept a "-c" option with a JS file and return an object with a "configure" property', function() {
+            args.parse(['-c', 'myconf.js']);
+            var r = args.get();
+
+            expect(r.configure).toBe('myconf.js');
+        });
+
+        it('should accept a "--configure" option with a JSON file and return an object with a "configure" property', function() {
             args.parse(['--configure', 'myconf.json']);
             var r = args.get();
 
             expect(r.configure).toBe('myconf.json');
+        });
+
+        it('should accept a "--configure" option with a JS file and return an object with a "configure" property', function() {
+            args.parse(['--configure', 'myconf.js']);
+            var r = args.get();
+
+            expect(r.configure).toBe('myconf.js');
         });
 
         it('should accept an "-e" option and return an object with a "encoding" property', function() {
@@ -191,14 +205,20 @@ describe('jsdoc/opts/args', function() {
             args.parse(['-q', 'foo=bar&fab=baz']);
             var r = args.get();
 
-            expect(r.query).toEqual({ foo: 'bar', fab: 'baz' });
+            expect(r.query).toEqual({
+                foo: 'bar',
+                fab: 'baz'
+            });
         });
 
         it('should accept a "--query" option and return an object with a "query" property', function() {
             args.parse(['--query', 'foo=bar&fab=baz']);
             var r = args.get();
 
-            expect(r.query).toEqual({ foo: 'bar', fab: 'baz' });
+            expect(r.query).toEqual({
+                foo: 'bar',
+                fab: 'baz'
+            });
         });
 
         it('should use type coercion on the "query" property so it has real booleans and numbers', function() {
@@ -208,8 +228,10 @@ describe('jsdoc/opts/args', function() {
                 baz: false,
                 qux: [1, -97]
             };
+            var r;
+
             args.parse(['-q', querystring.stringify(obj)]);
-            var r = args.get();
+            r = args.get();
 
             expect(r.query).toEqual(obj);
         });

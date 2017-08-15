@@ -47,14 +47,11 @@ describe('@module tag', function() {
 
     describe('virtual comments', function() {
         var docSet = jasmine.getDocSetFromFile('test/fixtures/moduletag4.js');
-        var m1 = docSet.getByLongname('module:M1').filter(function($) {
-            return !($.undocumented);
-        })[0];
         var clickProperties = docSet.getByLongname('module:M1~ClickProperties')[0];
         var virtFunc = docSet.getByLongname('module:M1.VirtualComment')[0];
         var virtFunc2 = docSet.getByLongname('module:M1#VirtualComment2')[0];
 
-        it('When a virtual comment typedef is inside a module, the typedef is a memberof the module', function () {
+        it('When a virtual comment typedef is inside a module, the typedef is a memberof the module', function() {
             expect(clickProperties.memberof).toBe('module:M1');
         });
 
@@ -66,7 +63,7 @@ describe('@module tag', function() {
             expect(clickProperties.scope).toBe('inner');
         });
 
-        it('When a virtual comment function is inside a module with a static scope, the function has the correct memberof and longname', function () {
+        it('When a virtual comment function is inside a module with a static scope, the function has the correct memberof and longname', function() {
             expect(virtFunc.longname).toBe('module:M1.VirtualComment');
             expect(virtFunc.memberof).toBe('module:M1');
         });
@@ -87,83 +84,100 @@ describe('@module tag', function() {
         });
     });
 
-    if (jasmine.jsParser !== 'rhino') {
-        describe('ES 2015 modules', function() {
-            describe('that export a default', function() {
-                describe('value type', function() {
-                    var docSet = jasmine.getDocSetFromFile('test/fixtures/moduletag6.js');
-                    var exports = docSet.getByLongname('module:appname').filter(function(d) {
-                        return d.kind === 'member';
-                    })[0];
+    describe('ES 2015 modules', function() {
+        describe('that export a default', function() {
+            describe('value type', function() {
+                var docSet = jasmine.getDocSetFromFile('test/fixtures/moduletag6.js');
+                var exports = docSet.getByLongname('module:appname').filter(function(d) {
+                    return d.kind === 'member';
+                })[0];
 
-                    it('When a value type is exported, it has the same name as the module longname', function() {
-                        expect(exports.name).toBe('module:appname');
-                    });
-                });
-
-                describe('object', function() {
-                    var docSet = jasmine.getDocSetFromFile('test/fixtures/moduletag7.js');
-                    var blend = docSet.getByLongname('module:color/mixer.blend')[0];
-
-                    it('When an object is exported, its members have the correct name, memberof, and kind', function() {
-                        expect(blend.name).toBe('blend');
-                        expect(blend.memberof).toBe('module:color/mixer');
-                        expect(blend.kind).toBe('function');
-                    });
+                it('When a value type is exported, it has the same name as the module longname', function() {
+                    expect(exports.name).toBe('module:appname');
                 });
             });
 
-            describe('that export named values', function() {
-                var docSet = jasmine.getDocSetFromFile('test/fixtures/moduletag8.js');
+            describe('object', function() {
+                var docSet = jasmine.getDocSetFromFile('test/fixtures/moduletag7.js');
                 var blend = docSet.getByLongname('module:color/mixer.blend')[0];
-                var lastColor = docSet.getByLongname('module:color/mixer.lastColor')[0];
-                var name = docSet.getByLongname('module:color/mixer.name')[0];
-                var toRgb = docSet.getByLongname('module:color/mixer.toRgb')[0];
 
-                it('When a method is exported, it has the correct name, memberof, and kind', function() {
+                it('When an object is exported, its members have the correct name, memberof, and kind', function() {
                     expect(blend.name).toBe('blend');
                     expect(blend.memberof).toBe('module:color/mixer');
                     expect(blend.kind).toBe('function');
                 });
-
-                it('When a variable is exported, it has the correct name, memberof, and kind', function() {
-                    expect(lastColor.name).toBe('lastColor');
-                    expect(lastColor.memberof).toBe('module:color/mixer');
-                    expect(lastColor.kind).toBe('member');
-                });
-
-                it('When a constant is exported, it has the correct name, memberof, and kind', function() {
-                    expect(name.name).toBe('name');
-                    expect(name.memberof).toBe('module:color/mixer');
-                    expect(name.kind).toBe('constant');
-                });
-
-                it('When a symbol is exported under a different name, it has the correct name, memberof, and kind', function() {
-                    expect(toRgb.name).toBe('toRgb');
-                    expect(toRgb.memberof).toBe('module:color/mixer');
-                    expect(toRgb.kind).toBe('function');
-                });
-            });
-
-            describe('that export another module in its entirety', function() {
-                it('should not crash JSDoc', function() {
-                    function getDocSet() {
-                        jasmine.getDocSetFromFile('test/fixtures/moduletag9.js');
-                    }
-
-                    expect(getDocSet).not.toThrow();
-                });
-            });
-
-            describe('that export an unnamed default function', function() {
-                it('should not crash JSDoc', function() {
-                    function getDocSet() {
-                        jasmine.getDocSetFromFile('test/fixtures/moduletag10.js');
-                    }
-
-                    expect(getDocSet).not.toThrow();
-                });
             });
         });
-    }
+
+        describe('that export named values', function() {
+            var docSet = jasmine.getDocSetFromFile('test/fixtures/moduletag8.js');
+            var blend = docSet.getByLongname('module:color/mixer.blend')[0];
+            var lastColor = docSet.getByLongname('module:color/mixer.lastColor')[0];
+            var name = docSet.getByLongname('module:color/mixer.name')[0];
+            var toRgb = docSet.getByLongname('module:color/mixer.toRgb')[0];
+
+            it('When a method is exported, it has the correct name, memberof, and kind', function() {
+                expect(blend.name).toBe('blend');
+                expect(blend.memberof).toBe('module:color/mixer');
+                expect(blend.kind).toBe('function');
+            });
+
+            it('When a variable is exported, it has the correct name, memberof, and kind', function() {
+                expect(lastColor.name).toBe('lastColor');
+                expect(lastColor.memberof).toBe('module:color/mixer');
+                expect(lastColor.kind).toBe('member');
+            });
+
+            it('When a constant is exported, it has the correct name, memberof, and kind', function() {
+                expect(name.name).toBe('name');
+                expect(name.memberof).toBe('module:color/mixer');
+                expect(name.kind).toBe('constant');
+            });
+
+            it('When a symbol is exported under a different name, it has the correct name, memberof, and kind', function() {
+                expect(toRgb.name).toBe('toRgb');
+                expect(toRgb.memberof).toBe('module:color/mixer');
+                expect(toRgb.kind).toBe('function');
+            });
+        });
+
+        describe('that export another module in its entirety', function() {
+            it('should not crash JSDoc', function() {
+                function getDocSet() {
+                    jasmine.getDocSetFromFile('test/fixtures/moduletag9.js');
+                }
+
+                expect(getDocSet).not.toThrow();
+            });
+        });
+
+        describe('that export an unnamed default function', function() {
+            it('should not crash JSDoc', function() {
+                function getDocSet() {
+                    jasmine.getDocSetFromFile('test/fixtures/moduletag10.js');
+                }
+
+                expect(getDocSet).not.toThrow();
+            });
+        });
+
+        describe('that export a class', function() {
+            var docSet = jasmine.getDocSetFromFile('test/fixtures/moduletag11.js');
+            var foo = docSet.getByLongname('module:foo.Foo')[0];
+            var testMethod = docSet.getByLongname('module:foo.Foo#testMethod')[0];
+
+            it('should identify the correct scope for the exported class', function() {
+                expect(foo).toBeDefined();
+            });
+
+            it('should merge the doclet for the constructor with the doclet for the ' +
+                'class', function() {
+                expect(foo.description).toBe('Test class constructor.');
+            });
+
+            it('should identify the correct scope for the exported class\'s methods', function() {
+                expect(testMethod).toBeDefined();
+            });
+        });
+    });
 });

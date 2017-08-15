@@ -1,7 +1,7 @@
 /**
-    @overview Adds support for reusable partial jsdoc files.
-    @module plugins/partial
-    @author Ludo Antonov <ludo@hulu.com>
+ * Adds support for reusable partial jsdoc files.
+ *
+ * @module plugins/partial
  */
 'use strict';
 
@@ -20,8 +20,8 @@ exports.handlers = {
      *     @partial "partial_doc.jsdoc"
      */
     beforeParse: function(e) {
-        e.source = e.source.replace(/(@partial \".*\")+/g, function($) {
-            var pathArg = $.match(/\".*\"/)[0].replace(/"/g, '');
+        e.source = e.source.replace(/(@partial ".*")+/g, function($) {
+            var pathArg = $.match(/".*"/)[0].replace(/"/g, '');
             var fullPath = path.join(e.filename, '..', pathArg);
 
             var partialData = fs.readFileSync(fullPath, env.opts.encoding);
