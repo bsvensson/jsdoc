@@ -1,7 +1,7 @@
 {
   "name": "jsdoc-esri",
-  "version": "3.5.1-esri.28",
-  "revision": "1499710618011",
+  "version": "3.5.2-esri.29",
+  "revision": "1499883458597",
   "description": "An API documentation generator for JavaScript.",
   "keywords": [
     "documentation",
@@ -17,7 +17,6 @@
     "bluebird": "~3.5.0",
     "catharsis": "~0.8.8",
     "escape-string-regexp": "~1.0.5",
-    "espree": "~3.1.7",
     "js2xmlparser": "~3.0.0",
     "klaw": "~2.0.0",
     "marked": "~0.3.6",
