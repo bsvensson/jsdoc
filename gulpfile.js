@@ -4,9 +4,7 @@
 var eslint = require('gulp-eslint');
 var exec = require('child_process').exec;
 var gulp = require('gulp');
-var istanbul = require('istanbul');
 var jsonEditor = require('gulp-json-editor');
-var os = require('os');
 var path = require('path');
 var util = require('util');
 
@@ -43,7 +41,8 @@ gulp.task('bump', function() {
 });
 
 gulp.task('coverage', function(cb) {
-    var cmd = util.format('./node_modules/.bin/istanbul cover %s -- -T', options.nodeBin);
+    var cmd = util.format('./node_modules/.bin/nyc --reporter=html %s -T', options.nodeBin);
+
     exec(cmd, execCb.bind(null, cb));
 });
 
@@ -56,6 +55,7 @@ gulp.task('lint', function() {
 
 gulp.task('test', function(cb) {
     var cmd = util.format('%s "%s" -T', options.nodePath, options.nodeBin);
+
     exec(cmd, execCb.bind(null, cb));
 });
 

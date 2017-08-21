@@ -1,7 +1,7 @@
 /**
- * @overview Dump information about parser events to the console.
+ * Dump information about parser events to the console.
+ *
  * @module plugins/eventDumper
- * @author Jeff Williams <jeffrey.l.williams@gmail.com>
  */
 'use strict';
 
@@ -24,6 +24,7 @@ var events = conf.include || [
     'parseComplete',
     'processingComplete'
 ];
+
 // Don't dump the excluded parser events
 if (conf.exclude) {
     events = _.difference(events, conf.exclude);

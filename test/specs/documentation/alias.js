@@ -30,7 +30,6 @@ describe('aliases', function() {
 
     it('When a symbol is a member of an aliased class, a this-variable is documented as if it were a member that class.', function() {
         var docSet = jasmine.getDocSetFromFile('test/fixtures/alias3.js');
-        var tcm = docSet.getByLongname('trackr.CookieManager')[0];
         var tcmValue = docSet.getByLongname('trackr.CookieManager#value')[0];
 
         expect(tcmValue.memberof).toEqual('trackr.CookieManager');
@@ -44,6 +43,43 @@ describe('aliases', function() {
 
         expect(jacketClass.length).toBe(1);
         expect(jacketClass[0].longname).toBe('module:jacket');
+    });
+
+    describe('formats', function() {
+        var docSet = jasmine.getDocSetFromFile('test/fixtures/alias5.js');
+        var toast = docSet.getByLongname('Toaster#toast')[0];
+        var getInstance = docSet.getByLongname('Toaster.getInstance')[0];
+        var clean = docSet.getByLongname('Toaster#clean')[0];
+
+        it('should work when the alias value specifies an instance member', function() {
+            expect(toast).toBeDefined();
+            expect(toast.name).toBe('toast');
+            expect(toast.memberof).toBe('Toaster');
+            expect(toast.scope).toBe('instance');
+        });
+
+        it('should work when the alias value specifies a static member', function() {
+            expect(getInstance).toBeDefined();
+            expect(getInstance.name).toBe('getInstance');
+            expect(getInstance.memberof).toBe('Toaster');
+            expect(getInstance.scope).toBe('static');
+        });
+
+        it('should work when the alias value only specifies the short name', function() {
+            expect(clean).toBeDefined();
+            expect(clean.name).toBe('clean');
+            expect(clean.memberof).toBe('Toaster');
+            expect(clean.scope).toBe('instance');
+        });
+    });
+
+    it('When a symbol is a constructor of a class with an alias, the constructor should get the correct longname', function() {
+        var docSet = jasmine.getDocSetFromFile('test/fixtures/alias6.js');
+        var constructor = docSet.getByLongname('module:example')[2];
+
+        expect(constructor.undocumented).toBe(true);
+        expect(constructor.name).toBe('module:example');
+        expect(constructor.alias).toBe('module:example');
     });
 
     it('When a symbol is documented as a static member of <global>, its scope is "global" and not "static".', function() {

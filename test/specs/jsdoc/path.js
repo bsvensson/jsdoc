@@ -88,16 +88,16 @@ describe('jsdoc/path', function() {
 
         it('finds the correct prefix for a group of absolute paths and dotted relative paths',
             function() {
-            var paths = [
-                path.join('..', 'jsdoc', 'foo', 'bar', 'baz', 'qux', 'quux', 'test.js'),
-                cwd.concat('foo', 'bar', 'bazzy.js').join(path.sep),
-                path.join('..', '..', 'Users', 'jsdoc', 'foo', 'bar', 'foobar.js')
-            ];
-            // we expect a trailing slash
-            var expected = cwd.concat('foo', 'bar', '').join(path.sep);
+                var paths = [
+                    path.join('..', 'jsdoc', 'foo', 'bar', 'baz', 'qux', 'quux', 'test.js'),
+                    cwd.concat('foo', 'bar', 'bazzy.js').join(path.sep),
+                    path.join('..', '..', 'Users', 'jsdoc', 'foo', 'bar', 'foobar.js')
+                ];
+                // we expect a trailing slash
+                var expected = cwd.concat('foo', 'bar', '').join(path.sep);
 
-            expect( path.commonPrefix(paths) ).toEqual(expected);
-        });
+                expect( path.commonPrefix(paths) ).toEqual(expected);
+            });
 
         it('returns an empty string when the paths array is empty', function() {
             var paths = [];
@@ -131,7 +131,86 @@ describe('jsdoc/path', function() {
         }
     });
 
-    xdescribe('getResourcePath', function() {
-        // TODO
+    describe('getResourcePath', function() {
+        var oldConf;
+        var oldPwd;
+
+        beforeEach(function() {
+            oldConf = env.opts.configure;
+            oldPwd = env.pwd;
+
+            env.opts.configure = path.join(env.dirname, 'lib', 'conf.json');
+            env.pwd = __dirname;
+        });
+
+        afterEach(function() {
+            env.opts.configure = oldConf;
+            env.pwd = oldPwd;
+        });
+
+        it('resolves pwd-relative path that exists', function() {
+            var resolved = path.getResourcePath('doclet');
+
+            expect(resolved).toBe( path.join(__dirname, 'doclet.js') );
+        });
+
+        it('resolves relative to ./ path that exists', function() {
+            // `path.join` discards the `.`, so we join with `path.sep` instead
+            var p = ['.', 'util'].join(path.sep);
+            var resolved = path.getResourcePath(p);
+
+            expect(resolved).toBe( path.join(__dirname, 'util') );
+        });
+
+        it('resolves relative to ../ path that exists', function() {
+            var p = path.join('..', 'jsdoc', 'util');
+            var resolved = path.getResourcePath(p);
+
+            expect(resolved).toBe( path.join(__dirname, 'util') );
+        });
+
+        it('resolves path using node_modules/', function() {
+            var resolved = path.getResourcePath('node_modules', 'catharsis');
+
+            expect(resolved).toBe( path.join(env.dirname, 'node_modules', 'catharsis') );
+        });
+
+        it('resolves paths relative to the configuration file\'s path', function() {
+            var resolved = path.getResourcePath('jsdoc');
+
+            expect(resolved).toBe( path.join(env.dirname, 'lib', 'jsdoc') );
+        });
+
+        it('resolves paths relative to the JSDoc path', function() {
+            var resolved = path.getResourcePath( path.join('lib', 'jsdoc') );
+
+            expect(resolved).toBe( path.join(env.dirname, 'lib', 'jsdoc') );
+        });
+
+        it('resolves installed module', function() {
+            var resolved = path.getResourcePath('catharsis');
+
+            expect(resolved).toBe( path.join(env.dirname, 'node_modules', 'catharsis',
+                'catharsis.js') );
+        });
+
+        it('fails to find a relative path that does not exist', function() {
+            var resolved = path.getResourcePath('foo');
+
+            expect(resolved).toBeNull();
+        });
+
+        it('finds an absolute path that does exist', function() {
+            var p = path.join(env.dirname, 'lib');
+            var resolved = path.getResourcePath(p);
+
+            expect(resolved).toBe(p);
+        });
+
+        it('fails to find an absolute path that does not exist', function() {
+            var resolved = path.getResourcePath( path.join(env.dirname, 'foo') );
+
+            expect(resolved).toBeNull();
+        });
     });
 });
