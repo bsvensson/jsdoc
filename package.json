@@ -1,6 +1,6 @@
 {
-  "version": "3.5.5-esri.40",
   "name": "jsdoc",
+  "version": "3.5.5-esri.41",
   "revision": "1505357514942",
   "description": "An API documentation generator for JavaScript.",
   "keywords": [
