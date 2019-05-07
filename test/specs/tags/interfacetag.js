@@ -1,43 +1,32 @@
-'use strict';
+describe('@interface tag', () => {
+    const logger = require('jsdoc/util/logger');
 
-describe('@interface tag', function() {
-    var definitions = require('jsdoc/tag/dictionary/definitions');
-    var Dictionary = require('jsdoc/tag/dictionary').Dictionary;
-    var doclet = require('jsdoc/doclet');
-    var logger = require('jsdoc/util/logger');
+    const docSet = jasmine.getDocSetFromFile('test/fixtures/interface-implements.js');
+    const testerInterface = docSet.getByLongname('ITester')[0];
+    const testerImplementation = docSet.getByLongname('MyTester')[0];
 
-    var docSet = jasmine.getDocSetFromFile('test/fixtures/interface-implements.js');
-    var testerInterface = docSet.getByLongname('ITester')[0];
-    var testerImplementation = docSet.getByLongname('MyTester')[0];
-
-    it('ITester has its kind set to "interface"', function() {
+    it('ITester has its kind set to "interface"', () => {
         expect(testerInterface.kind).toBe('interface');
     });
 
-    it('MyTester class has its kind set to "class" (not "interface")', function() {
+    it('MyTester class has its kind set to "class" (not "interface")', () => {
         expect(testerImplementation.kind).toBe('class');
     });
 
-    describe('virtual doclets', function() {
-        var tagDict;
-
-        beforeEach(function() {
+    describe('virtual doclets', () => {
+        beforeEach(() => {
             spyOn(logger, 'warn');
         });
 
-        afterEach(function() {
-            tagDict = new Dictionary();
-            definitions.defineTags(tagDict);
-            doclet._replaceDictionary(tagDict);
+        afterEach(() => {
+            jasmine.restoreTagDictionary();
         });
 
-        it('should support virtual doclets with the JSDoc tag dictionary', function() {
-            var docSet2;
-            var virtualInterface;
+        it('should support virtual doclets with the JSDoc tag dictionary', () => {
+            let docSet2;
+            let virtualInterface;
 
-            tagDict = new Dictionary();
-            definitions.defineTags(tagDict, definitions.jsdocTags);
-            doclet._replaceDictionary(tagDict);
+            jasmine.replaceTagDictionary('jsdoc');
 
             docSet2 = jasmine.getDocSetFromFile('test/fixtures/interfacetag2.js');
             virtualInterface = docSet2.getByLongname('VirtualInterface')[0];
@@ -47,19 +36,35 @@ describe('@interface tag', function() {
             expect(virtualInterface.longname).toBe('VirtualInterface');
         });
 
-        it('should not support virtual doclets with the Closure tag dictionary', function() {
-            var docSet2;
-            var virtualInterface;
+        it('should not support virtual doclets with the Closure tag dictionary', () => {
+            let docSet2;
+            let virtualInterface;
 
-            tagDict = new Dictionary();
-            definitions.defineTags(tagDict, definitions.closureTags);
-            doclet._replaceDictionary(tagDict);
+            jasmine.replaceTagDictionary('closure');
 
             docSet2 = jasmine.getDocSetFromFile('test/fixtures/interfacetag2.js');
             virtualInterface = docSet2.getByLongname('VirtualInterface')[0];
 
             expect(logger.warn).toHaveBeenCalled();
             expect(virtualInterface).not.toBeDefined();
+        });
+    });
+
+    describe('Closure Compiler tags', () => {
+        afterEach(() => {
+            jasmine.restoreTagDictionary();
+        });
+
+        it('should support @record as a synonym for @interface', () => {
+            let docSet2;
+            let myStructuralInterface;
+
+            jasmine.replaceTagDictionary('closure');
+
+            docSet2 = jasmine.getDocSetFromFile('test/fixtures/interfacetag3.js');
+            myStructuralInterface = docSet2.getByLongname('MyStructuralInterface')[0];
+
+            expect(myStructuralInterface.kind).toBe('interface');
         });
     });
 });

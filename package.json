@@ -1,7 +1,7 @@
 {
   "name": "jsdoc",
-  "version": "3.5.5-esri.46",
-  "revision": "1505357514942",
+  "version": "3.6.1-esri.46",
+  "revision": "1557084249838",
   "description": "An API documentation generator for JavaScript.",
   "keywords": [
     "documentation",
@@ -10,31 +10,33 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jsdoc3/jsdoc"
+    "url": "https://github.com/jsdoc/jsdoc"
   },
   "dependencies": {
-    "babylon": "7.0.0-beta.19",
-    "bluebird": "~3.5.0",
-    "catharsis": "https://github.com/lheberlie/catharsis/archive/e936ed83372d4e631285bfcdd4357331306977f6.tar.gz",
-    "escape-string-regexp": "~1.0.5",
-    "js2xmlparser": "~3.0.0",
-    "klaw": "~2.0.0",
-    "marked": "~0.3.6",
-    "mkdirp": "~0.5.1",
-    "requizzle": "~0.2.1",
-    "strip-json-comments": "~2.0.1",
+    "@babel/parser": "^7.4.4",
+    "bluebird": "^3.5.4",
+    "catharsis": "https://github.com/lheberlie/catharsis/archive/d49b472a4279ac501256ff975c6d5a071beef638.tar.gz",
+    "escape-string-regexp": "^2.0.0",
+    "js2xmlparser": "^4.0.0",
+    "klaw": "^3.0.0",
+    "markdown-it": "^8.4.2",
+    "markdown-it-anchor": "^5.0.2",
+    "marked": "^0.6.2",
+    "mkdirp": "^0.5.1",
+    "requizzle": "^0.2.2",
+    "strip-json-comments": "^3.0.1",
     "taffydb": "2.6.2",
-    "underscore": "~1.8.3"
+    "underscore": "~1.9.1"
   },
   "devDependencies": {
-    "gulp": "~3.9.1",
-    "gulp-eslint": "~4.0.0",
-    "gulp-json-editor": "~2.2.1",
-    "nyc": "~11.0.3",
-    "tv4": "https://github.com/hegemonic/tv4/tarball/own-properties"
+    "ajv": "^6.10.0",
+    "gulp": "^4.0.1",
+    "gulp-eslint": "^5.0.0",
+    "gulp-json-editor": "^2.5.2",
+    "nyc": "^14.1.0"
   },
   "engines": {
-    "node": ">=4.2.0"
+    "node": ">=8.15.0"
   },
   "scripts": {
     "test": "gulp lint; gulp test"
@@ -47,18 +49,20 @@
       "taffydb"
     ]
   },
-  "bugs": "https://github.com/jsdoc3/jsdoc/issues",
+  "bugs": "https://github.com/jsdoc/jsdoc/issues",
   "author": {
     "name": "Michael Mathews",
     "email": "micmath@gmail.com"
   },
   "contributors": [
     {
-      "url": "https://github.com/jsdoc3/jsdoc/graphs/contributors"
+      "url": "https://github.com/jsdoc/jsdoc/graphs/contributors"
     }
   ],
-  "maintainers": {
-    "name": "Jeff Williams",
-    "email": "jeffrey.l.williams@gmail.com"
-  }
+  "maintainers": [
+    {
+      "name": "Jeff Williams",
+      "email": "jeffrey.l.williams@gmail.com"
+    }
+  ]
 }

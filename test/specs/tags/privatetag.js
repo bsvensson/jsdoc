@@ -1,38 +1,27 @@
-'use strict';
+const logger = require('jsdoc/util/logger');
 
-var definitions = require('jsdoc/tag/dictionary/definitions');
-var dictionary = require('jsdoc/tag/dictionary');
-var Dictionary = dictionary.Dictionary;
-var doclet = require('jsdoc/doclet');
-var logger = require('jsdoc/util/logger');
-
-var originalDictionary = dictionary;
-
-describe('@private tag', function() {
-    var docSet = jasmine.getDocSetFromFile('test/fixtures/privatetag.js');
-    var foo = docSet.getByLongname('Foo')[0];
-    var bar = docSet.getByLongname('Foo#bar')[0];
+describe('@private tag', () => {
+    const docSet = jasmine.getDocSetFromFile('test/fixtures/privatetag.js');
+    const foo = docSet.getByLongname('Foo')[0];
+    const bar = docSet.getByLongname('Foo#bar')[0];
 
     it('When a symbol has a @private tag, the doclet has an `access` property set to `private`.',
-        function() {
+        () => {
             expect(foo.access).toBe('private');
         });
 
     it('When a symbol tagged with @private has members, the members do not inherit the @private ' +
-        'tag.', function() {
+        'tag.', () => {
         expect(bar.access).not.toBeDefined();
     });
 
-    describe('JSDoc tags', function() {
-        afterEach(function() {
-            doclet._replaceDictionary(originalDictionary);
+    describe('JSDoc tags', () => {
+        afterEach(() => {
+            jasmine.restoreTagDictionary();
         });
 
-        it('When JSDoc tags are enabled, the @private tag does not accept a value.', function() {
-            var dict = new Dictionary();
-
-            definitions.defineTags(dict, definitions.jsdocTags);
-            doclet._replaceDictionary(dict);
+        it('When JSDoc tags are enabled, the @private tag does not accept a value.', () => {
+            jasmine.replaceTagDictionary('jsdoc');
             spyOn(logger, 'warn');
 
             jasmine.getDocSetFromFile('test/fixtures/privatetag2.js');
@@ -41,19 +30,17 @@ describe('@private tag', function() {
         });
     });
 
-    describe('Closure Compiler tags', function() {
-        afterEach(function() {
-            doclet._replaceDictionary(originalDictionary);
+    describe('Closure Compiler tags', () => {
+        afterEach(() => {
+            jasmine.restoreTagDictionary();
         });
 
         it('When Closure Compiler tags are enabled, the @private tag accepts a type expression.',
-            function() {
-                var connectionPorts;
-                var dict = new Dictionary();
-                var privateDocs;
+            () => {
+                let connectionPorts;
+                let privateDocs;
 
-                definitions.defineTags(dict, definitions.closureTags);
-                doclet._replaceDictionary(dict);
+                jasmine.replaceTagDictionary('closure');
                 spyOn(logger, 'warn');
 
                 privateDocs = jasmine.getDocSetFromFile('test/fixtures/privatetag2.js');

@@ -1,22 +1,25 @@
-/* global expect, jasmine: true, runs, waits */
+/* global jasmine: true */
 'use strict';
 
 var fs = require('jsdoc/fs');
 var path = require('jsdoc/path');
-var util = require('util');
 
 var jsdoc = {
     augment: require('jsdoc/augment'),
-    borrow: require('jsdoc/borrow'),
+    doclet: require('jsdoc/doclet'),
     env: require('jsdoc/env'),
     schema: require('jsdoc/schema'),
     src: {
         handlers: require('jsdoc/src/handlers'),
         parser: require('jsdoc/src/parser')
+    },
+    tag: {
+        dictionary: require('jsdoc/tag/dictionary'),
+        definitions: require('jsdoc/tag/dictionary/definitions')
     }
 };
 
-var hasOwnProp = Object.prototype.hasOwnProperty;
+var originalDictionary = jsdoc.tag.dictionary;
 
 var jasmineAll = require('./lib/jasmine');
 var jasmine = jasmineAll.jasmine;
@@ -50,7 +53,7 @@ jasmine.jsParser = (function() {
     return parser;
 })();
 
-jasmine.initialize = function(done, verbose) {
+jasmine.initialize = function(done) {
     var jasmineEnv = jasmine.getEnv();
 
     if (reporter !== null) {
@@ -61,7 +64,7 @@ jasmine.initialize = function(done, verbose) {
     }
 
     var reporterOpts = {
-        color: jsdoc.env.opts.nocolor === true ? false : true,
+        color: !jsdoc.env.opts.nocolor,
         onComplete: done
     };
 
@@ -79,10 +82,6 @@ jasmine.initialize = function(done, verbose) {
 jasmine.createParser = function(type) {
     return jsdoc.src.parser.createParser(type || jasmine.jsParser);
 };
-
-function capitalize(str) {
-    return str[0].toUpperCase() + str.slice(1);
-}
 
 /**
  * Execute the specs in the specified folder.
@@ -123,6 +122,7 @@ function now() {
 
 jasmine.asyncSpecWait = function() {
     var wait = this.asyncSpecWait;
+
     wait.start = now();
     wait.done = false;
     (function innerWait() {
@@ -145,7 +145,6 @@ jasmine.asyncSpecDone = function() {
 
 jasmine.getDocSetFromFile = function(filename, parser, validate, augment) {
     var doclets;
-    var validationResult;
 
     var sourceCode = fs.readFileSync( path.join(jsdoc.env.dirname, filename), 'utf8' );
     var testParser = parser || jasmine.createParser();
@@ -155,7 +154,6 @@ jasmine.getDocSetFromFile = function(filename, parser, validate, augment) {
     /* eslint-disable no-script-url */
     doclets = testParser.parse('javascript:' + sourceCode);
     /* eslint-enable no-script-url */
-    jsdoc.borrow.indexAll(doclets);
 
     if (augment !== false) {
         jsdoc.augment.augmentAll(doclets);
@@ -177,6 +175,26 @@ jasmine.getDocSetFromFile = function(filename, parser, validate, augment) {
             });
         }
     };
+};
+
+jasmine.replaceTagDictionary = function(dictionaryNames) {
+    var dict = new jsdoc.tag.dictionary.Dictionary();
+    var originalDictionaries = jsdoc.env.conf.tags.dictionaries.slice(0);
+
+    if (!Array.isArray(dictionaryNames)) {
+        dictionaryNames = [dictionaryNames];
+    }
+
+    jsdoc.env.conf.tags.dictionaries = dictionaryNames;
+
+    jsdoc.tag.definitions.defineTags(dict);
+    jsdoc.doclet._replaceDictionary(dict);
+
+    jsdoc.env.conf.tags.dictionaries = originalDictionaries;
+};
+
+jasmine.restoreTagDictionary = function() {
+    jsdoc.doclet._replaceDictionary(originalDictionary);
 };
 
 // set up jasmine's global functions
