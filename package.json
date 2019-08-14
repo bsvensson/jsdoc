@@ -15,7 +15,7 @@
   "dependencies": {
     "@babel/parser": "^7.4.4",
     "bluebird": "^3.5.4",
-    "catharsis": "https://github.com/lheberlie/catharsis/archive/f5c148c205316d2b89a71e79f1d3b8a73403f57f.tar.gz",
+    "catharsis": "https://github.com/lheberlie/catharsis/archive/023dabbf1aaec2e02fddb0dd581537306d5802bd.tar.gz",
     "escape-string-regexp": "^2.0.0",
     "js2xmlparser": "^4.0.0",
     "klaw": "^3.0.0",
