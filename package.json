@@ -1,7 +1,7 @@
 {
   "name": "jsdoc",
-  "version": "3.6.8-esri.56",
-  "revision": "1642883938865",
+  "version": "3.6.9-esri.57",
+  "revision": "1642896048162",
   "description": "An API documentation generator for JavaScript.",
   "keywords": [
     "documentation",
@@ -50,7 +50,7 @@
     "node": ">=8.15.0"
   },
   "scripts": {
-    "preinstall": "npx npm-force-resolutions",
+    "preinstall": "npx force-resolutions",
     "test": "gulp lint; gulp test"
   },
   "bin": {
