@@ -16,8 +16,6 @@
     "@babel/parser": "^7.9.4",
     "bluebird": "^3.7.2",
     "catharsis": "https://github.com/lheberlie/catharsis/archive/023dabbf1aaec2e02fddb0dd581537306d5802bd.tar.gz",
-.7.2",
-
     "escape-string-regexp": "^2.0.0",
     "js2xmlparser": "^4.0.1",
     "klaw": "^3.0.0",
