@@ -1,7 +1,7 @@
 {
   "name": "jsdoc",
-  "version": "3.6.10-esri.58",
-  "revision": "1643076339624",
+  "version": "3.6.11-esri.59",
+  "revision": "1658338843387",
   "description": "An API documentation generator for JavaScript.",
   "keywords": [
     "documentation",
@@ -19,7 +19,7 @@
     "catharsis": "https://github.com/lheberlie/catharsis/archive/cd030bf37932ade0008472082c72c88e5ed4d763.tar.gz",
     "escape-string-regexp": "^2.0.0",
     "js2xmlparser": "^4.0.2",
-    "klaw": "^4.0.1",
+    "klaw": "^3.0.0",
     "markdown-it": "^12.3.2",
     "markdown-it-anchor": "^8.4.1",
     "marked": "^4.0.10",
@@ -47,7 +47,7 @@
     "trim-off-newlines": "1.0.3"
   },
   "engines": {
-    "node": ">=8.15.0"
+    "node": ">=12.0.0"
   },
   "scripts": {
     "test": "gulp lint; gulp test"
