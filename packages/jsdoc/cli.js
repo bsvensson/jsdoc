@@ -1,25 +1,43 @@
+/*
+  Copyright 2011 the JSDoc Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 /* eslint-disable indent, no-process-exit */
-const _ = require('lodash');
-const { config, Dependencies } = require('@jsdoc/core');
-const { Dictionary } = require('jsdoc/tag/dictionary');
-const Engine = require('@jsdoc/cli');
-const { EventBus, log } = require('@jsdoc/util');
-const { Filter } = require('jsdoc/src/filter');
-const fs = require('fs');
-const { Package } = require('jsdoc/package');
-const path = require('path');
-const { Scanner } = require('jsdoc/src/scanner');
-const stripBom = require('strip-bom');
-const stripJsonComments = require('strip-json-comments');
-const { taffy } = require('taffydb');
-const Promise = require('bluebird');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import Engine from '@jsdoc/cli';
+import { config, Dependencies, plugins } from '@jsdoc/core';
+import { augment, Package, resolveBorrows } from '@jsdoc/doclet';
+import { createParser, handlers } from '@jsdoc/parse';
+import { Dictionary } from '@jsdoc/tag';
+import fastGlob from 'fast-glob';
+import _ from 'lodash';
+import stripBom from 'strip-bom';
+import stripJsonComments from 'strip-json-comments';
+
+import test from './test/index.js';
+
+const { sync: glob } = fastGlob;
 
 /**
  * Helper methods for running JSDoc on the command line.
  *
  * @private
  */
-module.exports = (() => {
+export default (() => {
   const props = {
     docs: [],
     packageJson: null,
@@ -28,13 +46,17 @@ module.exports = (() => {
     tmpdir: null,
   };
 
-  const bus = new EventBus('jsdoc');
   const cli = {};
   const dependencies = new Dependencies();
   const engine = new Engine();
+  const emitter = engine.emitter;
+  const log = engine.log;
   const FATAL_ERROR_MESSAGE =
     'Exiting JSDoc because an error occurred. See the previous log messages for details.';
   const LOG_LEVELS = Engine.LOG_LEVELS;
+
+  dependencies.registerValue('emitter', emitter);
+  dependencies.registerValue('log', engine.log);
 
   cli.setEnv = (env) => {
     dependencies.registerValue('env', env);
@@ -46,7 +68,7 @@ module.exports = (() => {
   cli.setVersionInfo = () => {
     const env = dependencies.get('env');
 
-    const packageJsonPath = path.join(require.main.path, 'package.json');
+    const packageJsonPath = fileURLToPath(new URL('package.json', import.meta.url));
     // allow this to throw--something is really wrong if we can't read our own package file
     const info = JSON.parse(stripBom(fs.readFileSync(packageJsonPath, 'utf8')));
     const revision = new Date(parseInt(info.revision, 10));
@@ -63,7 +85,7 @@ module.exports = (() => {
   };
 
   // TODO: docs
-  cli.loadConfig = () => {
+  cli.loadConfig = async () => {
     const env = dependencies.get('env');
 
     try {
@@ -76,7 +98,7 @@ module.exports = (() => {
     }
 
     try {
-      env.conf = config.loadSync(env.opts.configure).config;
+      env.conf = (await config.load(env.opts.configure)).config;
     } catch (e) {
       cli.exit(1, `Cannot parse the config file: ${e}\n${FATAL_ERROR_MESSAGE}`);
 
@@ -88,9 +110,7 @@ module.exports = (() => {
     // Now that we're done loading and merging things, register dependencies.
     dependencies.registerValue('config', env.conf);
     dependencies.registerValue('options', env.opts);
-    dependencies.registerSingletonFactory('tags', () =>
-      Dictionary.fromConfig(dependencies.get('env'))
-    );
+    dependencies.registerSingletonFactory('tags', () => Dictionary.fromConfig(dependencies));
 
     return cli;
   };
@@ -117,13 +137,13 @@ module.exports = (() => {
       }
 
       if (options.pedantic) {
-        bus.once('logger:warn', recoverableError);
-        bus.once('logger:error', fatalError);
+        emitter.once('logger:warn', recoverableError);
+        emitter.once('logger:error', fatalError);
       } else {
-        bus.once('logger:error', recoverableError);
+        emitter.once('logger:error', recoverableError);
       }
 
-      bus.once('logger:fatal', fatalError);
+      emitter.once('logger:fatal', fatalError);
     }
 
     return cli;
@@ -190,7 +210,11 @@ module.exports = (() => {
   };
 
   // TODO: docs
-  cli.runTests = () => require('./test')(dependencies);
+  cli.runTests = async () => {
+    const result = await test(dependencies);
+
+    return result.overallStatus === 'failed' ? 1 : 0;
+  };
 
   // TODO: docs
   cli.printVersion = () => {
@@ -200,7 +224,7 @@ module.exports = (() => {
   };
 
   // TODO: docs
-  cli.main = () => {
+  cli.main = async () => {
     const env = dependencies.get('env');
 
     cli.scanFiles();
@@ -210,8 +234,9 @@ module.exports = (() => {
 
       return Promise.resolve(0);
     } else {
+      await cli.createParser();
+
       return cli
-        .createParser()
         .parseFiles()
         .processParseResults()
         .then(() => {
@@ -236,32 +261,16 @@ module.exports = (() => {
     const conf = dependencies.get('config');
     const options = dependencies.get('options');
     let packageJson;
-    let sourceFile;
-    let sourceFiles = options._ ? options._.slice(0) : [];
+    let sourceFiles = options._ ? options._.slice() : [];
 
-    if (conf.source && conf.source.include) {
-      sourceFiles = sourceFiles.concat(config.source.include);
+    if (conf.sourceFiles) {
+      sourceFiles = sourceFiles.concat(conf.sourceFiles);
     }
 
     // load the user-specified package file, if any
     if (options.package) {
       packageJson = readPackageJson(options.package);
-    }
-
-    // source files named `package.json` or `README.md` get special treatment, unless the user
-    // explicitly specified a package and/or README file
-    for (let i = 0, l = sourceFiles.length; i < l; i++) {
-      sourceFile = sourceFiles[i];
-
-      if (!options.package && /\bpackage\.json$/i.test(sourceFile)) {
-        packageJson = readPackageJson(sourceFile);
-        sourceFiles.splice(i--, 1);
-      }
-
-      if (!options.readme && /(\bREADME|\.md)$/i.test(sourceFile)) {
-        options.readme = sourceFile;
-        sourceFiles.splice(i--, 1);
-      }
+      props.packageJson = packageJson;
     }
 
     // Resolve the path to the README.
@@ -269,48 +278,32 @@ module.exports = (() => {
       options.readme = path.resolve(options.readme);
     }
 
-    props.packageJson = packageJson;
-
     return sourceFiles;
   }
 
   // TODO: docs
   cli.scanFiles = () => {
-    const conf = dependencies.get('config');
     const env = dependencies.get('env');
     const options = dependencies.get('options');
-    let filter;
-    let scanner;
 
     options._ = buildSourceList();
-
-    // are there any files to scan and parse?
-    if (conf.source && options._.length) {
-      filter = new Filter(conf.source);
-      scanner = new Scanner();
-
-      env.sourceFiles = scanner.scan(
-        options._,
-        options.recurse ? conf.recurseDepth : undefined,
-        filter
-      );
+    if (options._.length) {
+      env.sourceFiles = glob(options._, {
+        absolute: true,
+        onlyFiles: true,
+      });
     }
 
     return cli;
   };
 
-  cli.createParser = () => {
-    // Must be imported after the config is loaded.
-    const handlers = require('jsdoc/src/handlers');
-    const parser = require('jsdoc/src/parser');
-    const plugins = require('jsdoc/plugins');
-
+  cli.createParser = async () => {
     const conf = dependencies.get('config');
 
-    props.parser = parser.createParser(dependencies);
+    props.parser = createParser(dependencies);
 
     if (conf.plugins) {
-      plugins.installPlugins(conf.plugins, props.parser);
+      await plugins.installPlugins(conf.plugins, props.parser, dependencies);
     }
 
     handlers.attachTo(props.parser);
@@ -319,29 +312,29 @@ module.exports = (() => {
   };
 
   cli.parseFiles = () => {
-    // Must be imported after the config is loaded.
-    const augment = require('jsdoc/augment');
-    const borrow = require('jsdoc/borrow');
-
-    let docs;
     const env = dependencies.get('env');
     const options = dependencies.get('options');
     let packageDocs;
+    let docletStore;
 
-    props.docs = docs = props.parser.parse(env.sourceFiles, options.encoding);
+    docletStore = props.parser.parse(env.sourceFiles, options.encoding);
 
     // If there is no package.json, just create an empty package
-    packageDocs = new Package(props.packageJson);
+    packageDocs = new Package(props.packageJson, dependencies);
     packageDocs.files = env.sourceFiles || [];
-    docs.push(packageDocs);
+    docletStore.add(packageDocs);
 
     log.debug('Adding inherited symbols, mixins, and interface implementations...');
-    augment.augmentAll(docs);
+    augment.augmentAll(docletStore);
     log.debug('Adding borrowed doclets...');
-    borrow.resolveBorrows(docs);
+    resolveBorrows(docletStore);
     log.debug('Post-processing complete.');
 
-    props.parser.fireProcessingComplete(docs);
+    props.docs = docletStore;
+
+    if (props.parser.listenerCount('processingComplete')) {
+      props.parser.fireProcessingComplete(Array.from(docletStore.doclets));
+    }
 
     return cli;
   };
@@ -359,32 +352,30 @@ module.exports = (() => {
   };
 
   cli.dumpParseResults = () => {
-    console.log(JSON.stringify(props.docs, null, 4));
+    console.log(JSON.stringify(Array.from(props.docs.allDoclets), null, 2));
 
     return cli;
   };
 
-  cli.generateDocs = () => {
+  cli.generateDocs = async () => {
     let message;
     const options = dependencies.get('options');
     let template;
 
-    options.template = options.template || path.join(__dirname, 'templates', 'default');
+    options.template = options.template || '@jsdoc/template-legacy';
 
     try {
-      // TODO: Just look for a `publish` function in the specified module, not a `publish.js`
-      // file _and_ a `publish` function.
-      template = require(`${options.template}/publish`);
+      template = await import(options.template);
     } catch (e) {
-      log.fatal(`Unable to load template: ${e.message}` || e);
+      log.fatal(`Unable to load template: ${e.message || e}`);
     }
 
-    // templates should include a publish.js file that exports a "publish" function
+    // templates should export a "publish" function
     if (template.publish && typeof template.publish === 'function') {
       let publishPromise;
 
       log.info('Generating output files...');
-      publishPromise = template.publish(taffy(props.docs), dependencies);
+      publishPromise = template.publish(props.docs, dependencies);
 
       return Promise.resolve(publishPromise);
     } else {

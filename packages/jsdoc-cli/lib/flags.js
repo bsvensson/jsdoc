@@ -1,5 +1,21 @@
-const { cast } = require('@jsdoc/util');
-const querystring = require('querystring');
+/*
+  Copyright 2019 the JSDoc Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+import querystring from 'node:querystring';
+
+import { cast } from '@jsdoc/util';
 
 // TODO: Document the format of this object, then update the docs for `Engine`.
 /**
@@ -7,7 +23,7 @@ const querystring = require('querystring');
  *
  * @alias module:@jsdoc/cli/lib/flags
  */
-module.exports = {
+export default {
   access: {
     alias: 'a',
     array: true,
@@ -79,11 +95,6 @@ module.exports = {
     description: 'The `README` file to include in the documentation.',
     normalize: true,
     requiresArg: true,
-  },
-  recurse: {
-    alias: 'r',
-    boolean: true,
-    description: 'Recurse into subdirectories to find source files.',
   },
   template: {
     alias: 't',

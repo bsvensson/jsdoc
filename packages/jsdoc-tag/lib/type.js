@@ -1,11 +1,30 @@
+/*
+  Copyright 2020 the JSDoc Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 /**
  * @module @jsdoc/tag/lib/type
  * @alias @jsdoc/tag.type
  */
-const { cast } = require('@jsdoc/util');
-const catharsis = require('catharsis');
-const { extractInlineTag } = require('./inline');
-const { splitNameAndDescription } = require('@jsdoc/core').name;
+import { name } from '@jsdoc/core';
+import { cast } from '@jsdoc/util';
+import catharsis from 'catharsis';
+
+import { extractInlineTag } from './inline.js';
+
+const NAME_AND_DEFAULT_VALUE_REGEXP = /^(.+?)\s*=\s*(.+)$/;
+const NAME_AND_TYPE_REGEXP = /^(\[)?\s*(.+?)\s*(\])?$/;
 
 /**
  * Information about a type expression extracted from tag text.
@@ -77,38 +96,38 @@ function extractTypeExpression(string) {
 
 /** @private */
 function getTagInfo(tagValue, canHaveName, canHaveType) {
-  let name = '';
+  let tagName = '';
   let typeExpression = '';
-  let text = tagValue;
+  let tagText = tagValue;
   let expressionAndText;
   let nameAndDescription;
   let typeOverride;
 
   if (canHaveType) {
-    expressionAndText = extractTypeExpression(text);
+    expressionAndText = extractTypeExpression(tagText);
     typeExpression = expressionAndText.expression;
-    text = expressionAndText.newString;
+    tagText = expressionAndText.newString;
   }
 
   if (canHaveName) {
-    nameAndDescription = splitNameAndDescription(text);
-    name = nameAndDescription.name;
-    text = nameAndDescription.description;
+    nameAndDescription = name.splitNameAndDescription(tagText);
+    tagName = nameAndDescription.name;
+    tagText = nameAndDescription.description;
   }
 
   // an inline @type tag, like {@type Foo}, overrides the type expression
   if (canHaveType) {
-    typeOverride = extractInlineTag(text, 'type');
+    typeOverride = extractInlineTag(tagText, 'type');
     if (typeOverride.tags && typeOverride.tags[0]) {
       typeExpression = typeOverride.tags[0].text;
     }
-    text = typeOverride.newString;
+    tagText = typeOverride.newString;
   }
 
   return {
-    name: name,
+    name: tagName,
     typeExpression: typeExpression,
-    text: text,
+    text: tagText,
   };
 }
 
@@ -143,17 +162,20 @@ function getTagInfo(tagValue, canHaveName, canHaveType) {
 function parseName(tagInfo) {
   // like '[foo]' or '[ foo ]' or '[foo=bar]' or '[ foo=bar ]' or '[ foo = bar ]'
   // or 'foo=bar' or 'foo = bar'
-  if (/^(\[)?\s*(.+?)\s*(\])?$/.test(tagInfo.name)) {
-    tagInfo.name = RegExp.$2;
+  let match = tagInfo.name.match(NAME_AND_TYPE_REGEXP);
+
+  if (match) {
+    tagInfo.name = match[2];
     // were the "optional" brackets present?
-    if (RegExp.$1 && RegExp.$3) {
+    if (match[1] && match[3]) {
       tagInfo.optional = true;
     }
 
     // like 'foo=bar' or 'foo = bar'
-    if (/^(.+?)\s*=\s*(.+)$/.test(tagInfo.name)) {
-      tagInfo.name = RegExp.$1;
-      tagInfo.defaultvalue = cast(RegExp.$2);
+    match = tagInfo.name.match(NAME_AND_DEFAULT_VALUE_REGEXP);
+    if (match) {
+      tagInfo.name = match[1];
+      tagInfo.defaultvalue = cast(match[2]);
     }
   }
 
@@ -275,7 +297,7 @@ const typeParsers = [parseName, parseTypeExpression];
  * @return {module:@jsdoc/tag.type.TagInfo} Information obtained from the tag.
  * @throws {Error} Thrown if a type expression cannot be parsed.
  */
-exports.parse = (tagValue, canHaveName, canHaveType) => {
+export function parse(tagValue, canHaveName, canHaveType) {
   let tagInfo;
 
   if (typeof tagValue !== 'string') {
@@ -295,4 +317,4 @@ exports.parse = (tagValue, canHaveName, canHaveType) => {
   }
 
   return tagInfo;
-};
+}

@@ -1,8 +1,27 @@
-describe('@jsdoc/tag/lib/inline', () => {
-  const inline = require('../../../lib/inline');
+/*
+  Copyright 2020 the JSDoc Authors.
 
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+import * as inline from '../../../lib/inline.js';
+
+describe('@jsdoc/tag/lib/inline', () => {
   it('is an object', () => {
     expect(inline).toBeObject();
+  });
+
+  it('exports an `includesInlineTag` function', () => {
+    expect(inline.includesInlineTag).toBeFunction();
   });
 
   it('exports an isInlineTag function', () => {
@@ -17,8 +36,45 @@ describe('@jsdoc/tag/lib/inline', () => {
     expect(inline.extractInlineTag).toBeFunction();
   });
 
+  describe('includesInlineTag', () => {
+    const { includesInlineTag } = inline;
+
+    it('identifies a string that is an inline tag', () => {
+      expect(includesInlineTag('{@mytag hooray}', 'mytag')).toBeTrue();
+    });
+
+    it('identifies when a string does not include an inline tag', () => {
+      expect(includesInlineTag('mytag hooray', 'mytag')).toBeFalse();
+    });
+
+    it('identifies when a string contains an inline tag, plus extra characters', () => {
+      expect(includesInlineTag('this is {@mytag hooray}', 'mytag')).toBeTrue();
+    });
+
+    it('allows any inline tag by default', () => {
+      expect(includesInlineTag('Hello, {@anyoldtag will do}')).toBeTrue();
+    });
+
+    it('identifies things that are not inline tags when a tag name is not provided', () => {
+      expect(includesInlineTag('mytag hooray')).toBeFalse();
+    });
+
+    it('allows regexp characters in the tag name', () => {
+      expect(includesInlineTag('{@mytags hooray}', 'mytag\\S')).toBeTrue();
+    });
+
+    it('returns false (rather than throwing) with invalid input', () => {
+      function badInput() {
+        return includesInlineTag();
+      }
+
+      expect(badInput).not.toThrow();
+      expect(badInput()).toBeFalse();
+    });
+  });
+
   describe('isInlineTag', () => {
-    const isInlineTag = inline.isInlineTag;
+    const { isInlineTag } = inline;
 
     it('identifies an inline tag', () => {
       expect(isInlineTag('{@mytag hooray}', 'mytag')).toBeTrue();

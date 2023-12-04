@@ -1,29 +1,44 @@
-function buildText(type, name, desc) {
-  let text = '';
+/*
+  Copyright 2020 the JSDoc Authors.
 
-  if (type) {
-    text += `{${type}}`;
-    if (name || desc) {
-      text += ' ';
-    }
-  }
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
 
-  if (name) {
-    text += name;
-    if (desc) {
-      text += ' ';
-    }
-  }
+      https://www.apache.org/licenses/LICENSE-2.0
 
-  if (desc) {
-    text += desc;
-  }
-
-  return text;
-}
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+import * as type from '../../../lib/type.js';
 
 describe('@jsdoc/tag/lib/type', () => {
-  const type = require('../../../lib/type');
+  function buildText(typeInfo, name, desc) {
+    let text = '';
+
+    if (typeInfo) {
+      text += `{${typeInfo}}`;
+      if (name || desc) {
+        text += ' ';
+      }
+    }
+
+    if (name) {
+      text += name;
+      if (desc) {
+        text += ' ';
+      }
+    }
+
+    if (desc) {
+      text += desc;
+    }
+
+    return text;
+  }
 
   it('is an object', () => {
     expect(type).toBeObject();

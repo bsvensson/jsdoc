@@ -1,3 +1,18 @@
+/*
+  Copyright 2020 the JSDoc Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 /**
  * @module @jsdoc/tag/lib/inline
  * @alias @jsdoc/tag.inline
@@ -58,7 +73,23 @@ function regExpFactory(tagName = '\\S+', prefix = '', suffix = '') {
  * @returns {boolean} Set to `true` if the string is a valid inline tag or `false` in all other
  * cases.
  */
-exports.isInlineTag = (string, tagName) => regExpFactory(tagName, '^', '$').test(string);
+export function isInlineTag(string, tagName) {
+  return regExpFactory(tagName, '^', '$').test(string);
+}
+
+/**
+ * Check whether a string includes one or more inline tags. You can check for a specific inline tag
+ * or for any valid inline tag.
+ *
+ * @param {string} string - The string to check.
+ * @param {?string} tagName - The inline tag to match. May contain regexp characters. If this
+ * parameter is omitted, this method returns `true` for any valid inline tag.
+ * @returns {boolean} Set to `true` if the string includes at least one valid inline tag or `false`
+ * in all other cases.
+ */
+export function includesInlineTag(string, tagName) {
+  return regExpFactory(tagName).test(string);
+}
 
 /**
  * Replace all instances of multiple inline tags with other text.
@@ -70,7 +101,7 @@ exports.isInlineTag = (string, tagName) => regExpFactory(tagName, '^', '$').test
  * @return {module:@jsdoc/tag.inline.InlineTagResult} The updated string, as well as information
  * about the inline tags that were found.
  */
-const replaceInlineTags = (exports.replaceInlineTags = (string, replacers) => {
+export function replaceInlineTags(string, replacers) {
   const tagInfo = [];
 
   function replaceMatch(replacer, tag, match, text) {
@@ -106,7 +137,7 @@ const replaceInlineTags = (exports.replaceInlineTags = (string, replacers) => {
     tags: tagInfo,
     newString: string.trim(),
   };
-});
+}
 
 /**
  * Replace all instances of an inline tag with other text.
@@ -118,13 +149,13 @@ const replaceInlineTags = (exports.replaceInlineTags = (string, replacers) => {
  * @return {module:@jsdoc/tag.inline.InlineTagResult} The updated string, as well as information
  * about the inline tags that were found.
  */
-const replaceInlineTag = (exports.replaceInlineTag = (string, tag, replacer) => {
+export function replaceInlineTag(string, tag, replacer) {
   const replacers = {};
 
   replacers[tag] = replacer;
 
   return replaceInlineTags(string, replacers);
-});
+}
 
 /**
  * Extract inline tags from a string, replacing them with an empty string.
@@ -134,5 +165,6 @@ const replaceInlineTag = (exports.replaceInlineTag = (string, tag, replacer) => 
  * @return {module:@jsdoc/tag.inline.InlineTagResult} The updated string, as well as information
  * about the inline tags that were found.
  */
-exports.extractInlineTag = (string, tag) =>
-  replaceInlineTag(string, tag, (str, { completeTag }) => str.replace(completeTag, ''));
+export function extractInlineTag(string, tag) {
+  return replaceInlineTag(string, tag, (str, { completeTag }) => str.replace(completeTag, ''));
+}

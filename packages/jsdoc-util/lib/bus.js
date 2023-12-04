@@ -1,9 +1,24 @@
-const _ = require('lodash');
-const EventEmitter = require('events').EventEmitter;
-const { default: ow } = require('ow');
+/*
+  Copyright 2019 the JSDoc Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+import EventEmitter from 'node:events';
+
+import _ from 'lodash';
+import ow from 'ow';
 
 let cache = {};
-const hasOwnProp = Object.prototype.hasOwnProperty;
 
 /**
  * An event bus that works the same way as a standard Node.js event emitter, with a few key
@@ -21,7 +36,7 @@ const hasOwnProp = Object.prototype.hasOwnProperty;
  * @alias module:@jsdoc/util.EventBus
  * @extends module:events.EventEmitter
  */
-class EventBus extends EventEmitter {
+export default class EventBus extends EventEmitter {
   /**
    * Create a new event bus, or retrieve the cached event bus for the ID you specify.
    *
@@ -37,7 +52,7 @@ class EventBus extends EventEmitter {
 
     const shouldCache = _.isBoolean(opts.cache) ? opts.cache : true;
 
-    if (hasOwnProp.call(cache, id) && shouldCache) {
+    if (Object.hasOwn(cache, id) && shouldCache) {
       return cache[id];
     }
 
@@ -48,5 +63,3 @@ class EventBus extends EventEmitter {
     }
   }
 }
-
-module.exports = EventBus;

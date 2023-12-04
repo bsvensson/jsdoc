@@ -1,0 +1,40 @@
+{
+  "name": "@jsdoc/plugins",
+  "version": "0.1.9",
+  "description": "Sample plugins for JSDoc.",
+  "keywords": [
+    "jsdoc"
+  ],
+  "author": "Jeff Williams <jeffrey.l.williams@gmail.com>",
+  "homepage": "https://jsdoc.app/",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jsdoc/jsdoc.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/jsdoc/jsdoc/issues"
+  },
+  "type": "module",
+  "exports": {
+    "./*": {
+      "import": "./*"
+    }
+  },
+  "engines": {
+    "node": ">=v18.12.0"
+  },
+  "devDependencies": {
+    "@jsdoc/core": "^0.5.6",
+    "@jsdoc/parse": "^0.3.9"
+  },
+  "dependencies": {
+    "@jsdoc/util": "^0.3.2"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "@jsdoc/ast",
+  "version": "0.2.9",
+  "description": "JSDoc tools for working with abstract syntax trees (ASTs).",
+  "keywords": [
+    "jsdoc"
+  ],
+  "author": "Jeff Williams <jeffrey.l.williams@gmail.com>",
+  "homepage": "https://jsdoc.app/",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jsdoc/jsdoc.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/jsdoc/jsdoc/issues"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./index.js"
+    },
+    "./lib/*": {
+      "import": "./lib/*"
+    }
+  },
+  "dependencies": {
+    "@babel/parser": "^7.23.5",
+    "@jsdoc/core": "^0.5.6",
+    "@jsdoc/util": "^0.3.2",
+    "lodash": "^4.17.21"
+  },
+  "engines": {
+    "node": ">=v18.12.0"
+  }
+}

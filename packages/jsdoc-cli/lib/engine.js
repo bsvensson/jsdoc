@@ -1,10 +1,29 @@
-const _ = require('lodash');
-const { EventBus } = require('@jsdoc/util');
-const flags = require('./flags');
-const help = require('./help');
-const { LEVELS, Logger } = require('./logger');
-const { default: ow } = require('ow');
-const yargs = require('yargs-parser');
+/*
+  Copyright 2019 the JSDoc Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+
+import EventEmitter from 'node:events';
+
+import { getLogFunctions } from '@jsdoc/util';
+import _ from 'lodash';
+import ow from 'ow';
+import yargs from 'yargs-parser';
+
+import flags from './flags.js';
+import help from './help.js';
+import { LEVELS, Logger } from './logger.js';
 
 function validateChoice(flagInfo, choices, values) {
   let flagNames = flagInfo.alias ? `-${flagInfo.alias}/` : '';
@@ -83,7 +102,7 @@ const { KNOWN_FLAGS, YARGS_FLAGS } = (() => {
  *
  * @alias module:@jsdoc/cli
  */
-class Engine {
+export default class Engine {
   /**
    * Create an instance of the CLI engine.
    *
@@ -100,14 +119,13 @@ class Engine {
     ow(opts.revision, ow.optional.date);
     ow(opts.version, ow.optional.string);
 
-    this._bus = new EventBus('jsdoc', {
-      cache: _.isBoolean(opts._cacheEventBus) ? opts._cacheEventBus : true,
-    });
+    this.emitter = new EventEmitter();
+    this.flags = [];
     this._logger = new Logger({
-      emitter: this._bus,
+      emitter: this.emitter,
       level: opts.logLevel,
     });
-    this.flags = [];
+    this.log = getLogFunctions(this.emitter);
     this.revision = opts.revision;
     this.version = opts.version;
   }
@@ -225,5 +243,3 @@ class Engine {
 }
 
 Engine.LOG_LEVELS = LEVELS;
-
-module.exports = Engine;

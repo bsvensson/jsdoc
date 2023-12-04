@@ -1,12 +1,28 @@
-const { augmentAll } = require('jsdoc/augment');
-const { createParser } = require('jsdoc/src/parser');
-const { EventBus } = require('@jsdoc/util');
-const fs = require('fs');
-const handlers = require('jsdoc/src/handlers');
-const path = require('path');
+/*
+  Copyright 2011 the JSDoc Authors.
 
-const bus = new EventBus('jsdoc');
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { augment } from '@jsdoc/doclet';
+import { createParser, handlers } from '@jsdoc/parse';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const originalDictionaries = ['jsdoc', 'closure'];
+const packagePath = path.resolve(__dirname, '../..');
 const parseResults = [];
 
 const helpers = {
@@ -18,46 +34,50 @@ const helpers = {
   },
   createParser: () => createParser(jsdoc.deps),
   didLog: (fn, level) => {
+    const emitter = jsdoc.deps.get('emitter');
     const events = [];
 
     function listener(e) {
       events.push(e);
     }
 
-    bus.on(`logger:${level}`, listener);
+    emitter.on(`logger:${level}`, listener);
     fn();
-    bus.off(`logger:${level}`, listener);
+    emitter.off(`logger:${level}`, listener);
 
     return events.length !== 0;
   },
-  getDocSetFromFile: (filename, parser, shouldValidate, augment) => {
-    let doclets;
-    const packagePath = path.resolve(__dirname, '../..');
-    const sourceCode = fs.readFileSync(path.join(packagePath, filename), 'utf8');
+  dirname: (importMetaUrl) => path.dirname(fileURLToPath(importMetaUrl)),
+  getDocSetFromFile: (filename, parser, shouldValidate, shouldAugment) => {
+    const docSet = {
+      get doclets() {
+        return Array.from(docSet.docletStore.allDoclets);
+      },
+      getByLongname(longname) {
+        return docSet.doclets.filter((doclet) => (doclet.longname || doclet.name) === longname);
+      },
+    };
+    const sourcePath = path.isAbsolute(filename) ? filename : path.join(packagePath, filename);
+    const sourceCode = fs.readFileSync(sourcePath, 'utf8');
     const testParser = parser || helpers.createParser();
 
     handlers.attachTo(testParser);
 
-    /* eslint-disable no-script-url */
-    doclets = testParser.parse(`javascript:${sourceCode}`);
-    /* eslint-enable no-script-url */
+    docSet.docletStore = testParser.parse(`javascript:${sourceCode}`); // eslint-disable-line no-script-url
 
-    if (augment !== false) {
-      augmentAll(doclets);
+    if (shouldAugment !== false) {
+      augment.augmentAll(docSet.docletStore);
     }
 
     // tests assume that borrows have not yet been resolved
 
     if (shouldValidate !== false) {
-      helpers.addParseResults(filename, doclets);
+      helpers.addParseResults(filename, docSet.doclets);
     }
 
-    return {
-      doclets,
-      getByLongname(longname) {
-        return doclets.filter((doclet) => (doclet.longname || doclet.name) === longname);
-      },
-    };
+    docSet.docletStore.stopListening();
+
+    return docSet;
   },
   getParseResults: () => parseResults,
   replaceTagDictionary: (dictionaryNames) => {

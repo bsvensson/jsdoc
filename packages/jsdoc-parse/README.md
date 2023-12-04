@@ -1,3 +1,3 @@
 # `@jsdoc/parse`
 
-Code-parsing tools for JSDoc.
+Parses, and extracts information from, source code.

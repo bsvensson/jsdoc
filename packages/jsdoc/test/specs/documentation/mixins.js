@@ -1,5 +1,20 @@
-const augment = require('jsdoc/augment');
-const { SCOPE } = require('@jsdoc/core').name;
+/*
+  Copyright 2014 the JSDoc Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+import { name } from '@jsdoc/core';
+import { augment } from '@jsdoc/doclet';
 
 describe('mixins', () => {
   describe('doclet augmentation', () => {
@@ -41,7 +56,7 @@ describe('mixins', () => {
         const classAMethod = docSet.getByLongname('module:mixy.ClassA#method')[0];
 
         expect(classAMethod).toBeObject();
-        expect(classAMethod.scope).toBe(SCOPE.NAMES.INSTANCE);
+        expect(classAMethod.scope).toBe(name.SCOPE.NAMES.INSTANCE);
         expect(classAMethod.memberof).toBe('module:mixy.ClassA');
       });
     });

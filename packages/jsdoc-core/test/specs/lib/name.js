@@ -1,6 +1,21 @@
-describe('@jsdoc/core.name', () => {
-  const { name } = require('@jsdoc/core');
+/*
+  Copyright 2019 the JSDoc Authors.
 
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+import * as name from '../../../lib/name.js';
+
+describe('@jsdoc/core.name', () => {
   it('exists', () => {
     expect(name).toBeObject();
   });
@@ -17,16 +32,16 @@ describe('@jsdoc/core.name', () => {
     expect(name.getBasename).toBeFunction();
   });
 
+  it('has a getLeadingScope method', () => {
+    expect(name.getLeadingScope).toBeFunction();
+  });
+
+  it('has a getTrailingScope method', () => {
+    expect(name.getTrailingScope).toBeFunction();
+  });
+
   it('has a hasAncestor method', () => {
     expect(name.hasAncestor).toBeFunction();
-  });
-
-  it('has a hasLeadingScope method', () => {
-    expect(name.hasLeadingScope).toBeFunction();
-  });
-
-  it('has a hasTrailingScope method', () => {
-    expect(name.hasTrailingScope).toBeFunction();
   });
 
   it('has a LONGNAMES enum', () => {
@@ -98,9 +113,7 @@ describe('@jsdoc/core.name', () => {
     });
   });
 
-  xdescribe('fromParts', () => {
-    // TODO: tests
-  });
+  // TODO: fromParts tests
 
   describe('getBasename', () => {
     it('returns null on empty input', () => {
@@ -113,6 +126,26 @@ describe('@jsdoc/core.name', () => {
 
     it('returns the basename if the original value has punctuation', () => {
       expect(name.getBasename('foo.Bar#baz')).toBe('foo');
+    });
+  });
+
+  describe('getLeadingScope', () => {
+    it('returns the scope character if the string starts with a scope character', () => {
+      expect(name.getLeadingScope('#foo')).toBe('#');
+    });
+
+    it('returns undefined if the string does not start with a scope character', () => {
+      expect(name.getLeadingScope('!foo')).toBeUndefined();
+    });
+  });
+
+  describe('getTrailingScope', () => {
+    it('returns the scope character if the string ends with a scope character', () => {
+      expect(name.getTrailingScope('Foo#')).toBe('#');
+    });
+
+    it('returns undefined if the string does not end with a scope character', () => {
+      expect(name.getTrailingScope('Foo!')).toBeUndefined();
     });
   });
 
@@ -142,26 +175,6 @@ describe('@jsdoc/core.name', () => {
     });
   });
 
-  describe('hasLeadingScope', () => {
-    it('returns true if the string starts with a scope character', () => {
-      expect(name.hasLeadingScope('#foo')).toBeTrue();
-    });
-
-    it('returns false if the string does not start with a scope character', () => {
-      expect(name.hasLeadingScope('!foo')).toBeFalse();
-    });
-  });
-
-  describe('hasTrailingScope', () => {
-    it('returns true if the string ends with a scope character', () => {
-      expect(name.hasTrailingScope('Foo#')).toBeTrue();
-    });
-
-    it('returns false if the string does not end with a scope character', () => {
-      expect(name.hasTrailingScope('Foo!')).toBeFalse();
-    });
-  });
-
   describe('LONGNAMES', () => {
     it('has an ANONYMOUS property', () => {
       expect(name.LONGNAMES.ANONYMOUS).toBeString();
@@ -172,21 +185,13 @@ describe('@jsdoc/core.name', () => {
     });
   });
 
-  xdescribe('longnamesToTree', () => {
-    // TODO: tests
-  });
+  // TODO: longnamesToTree tests
 
-  describe('MODULE_NAMESPACE', () => {
-    // This is just a string, so nothing to test.
-  });
+  // MODULE_NAMESPACE is just a string, so nothing to test.
 
-  xdescribe('nameIsLongname', () => {
-    // TODO(hegemonic)
-  });
+  // TODO: nameIsLongname tests
 
-  xdescribe('prototypeToPunc', () => {
-    // TODO(hegemonic)
-  });
+  // TODO: prototypeToPunc tests
 
   describe('PUNC_TO_SCOPE', () => {
     it('has the same number of properties as SCOPE_TO_PUNC', () => {
