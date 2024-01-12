@@ -22,7 +22,7 @@
     "js2xmlparser": "^4.0.2",
     "klaw": "^3.0.0",
     "markdown-it": "^14.0.0",
-    "markdown-it-anchor": "^8.4.1",
+    "markdown-it-anchor": "^8.6.7",
     "marked": "^4.0.10",
     "mkdirp": "^1.0.4",
     "requizzle": "^0.2.3",
